@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use crate::{draw::style::Style, traits::copy_over::CopyFrom};
 
 pub enum BlendMode {
@@ -6,17 +7,13 @@ pub enum BlendMode {
     OnlyStyle
 }
 
-#[derive(Debug)]
+#[derive(
+    Debug, Clone, Copy,
+    Serialize, Deserialize
+)]
 pub struct Character {
     character: char,
     style: Style
-}
-
-impl CopyFrom for Character {
-    fn copy_from(&mut self, rhs: &Self) {
-        self.character= rhs.character;
-        self.style.copy_from(&rhs.style);
-    }
 }
 
 impl Character {
@@ -48,5 +45,21 @@ impl Character {
 
     pub fn style(&self) -> &Style {
         &self.style
+    }
+}
+
+impl Default for Character {
+    fn default() -> Self {
+        Self::new(
+            ' ',
+            Style::default()
+        )
+    }
+}
+
+impl CopyFrom for Character {
+    fn copy_from(&mut self, rhs: &Self) {
+        self.character= rhs.character;
+        self.style.copy_from(&rhs.style);
     }
 }

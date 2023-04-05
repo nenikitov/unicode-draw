@@ -1,8 +1,13 @@
 use std::ops::Add;
 
+use serde::{Serialize, Deserialize};
+
 use crate::traits::copy_over::CopyFrom;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(
+    Debug, Clone, Copy,
+    Serialize, Deserialize
+)]
 pub enum Color {
     None,
     Black,    Red,     Green,     Yellow,     Blue,     Magenta,     Cyan,     LightGray,
@@ -11,7 +16,10 @@ pub enum Color {
 }
 
 
-#[derive(Debug)]
+#[derive(
+    Debug, Clone, Copy,
+    Serialize, Deserialize
+)]
 pub struct Modifiers {
     pub bold: bool,
     pub italic: bool,
@@ -28,13 +36,21 @@ impl Modifiers {
     }
 }
 
+impl Default for Modifiers {
+    fn default() -> Self {
+        Self::new(
+            false,
+            false,
+            false
+        )
+    }
+}
+
 impl Add for Modifiers {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Modifiers::new(
-            self.bold || rhs.bold,
-            self.italic || rhs.italic,
+        Self::new( self.bold || rhs.bold, self.italic || rhs.italic,
             self.reverse || rhs.reverse
         )
     }
@@ -49,7 +65,10 @@ impl CopyFrom for Modifiers {
 }
 
 
-#[derive(Debug)]
+#[derive(
+    Debug, Clone, Copy,
+    Serialize, Deserialize
+)]
 pub struct Style {
     pub fg: Color,
     pub bg: Color,
@@ -66,11 +85,21 @@ impl Style {
     }
 }
 
+impl Default for Style {
+    fn default() -> Self {
+        Self::new(
+            Color::None,
+            Color::None,
+            Modifiers::default()
+        )
+    }
+}
+
 impl Add for Style {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Style::new(
+        Self::new(
             rhs.fg,
             rhs.bg,
             self.modifiers + rhs.modifiers
