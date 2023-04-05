@@ -1,3 +1,6 @@
+use draw::Canvas;
+
 fn main() {
-    println!("Hello, world!");
+    let canvas = Canvas::new();
+    println!("{:?}", canvas);
 }
