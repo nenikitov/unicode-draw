@@ -1,6 +1,6 @@
 use std::ops::Add;
 
-use crate::copy_over::CopyFrom;
+use crate::traits::copy_over::CopyFrom;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Color {

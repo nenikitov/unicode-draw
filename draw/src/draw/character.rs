@@ -1,4 +1,4 @@
-use crate::{style::Style, copy_over::CopyFrom};
+use crate::{draw::style::Style, traits::copy_over::CopyFrom};
 
 pub enum BlendMode {
     Overwrite,

@@ -1,6 +1,4 @@
-mod canvas;
-mod character;
-mod style;
-mod copy_over;
+mod draw;
+mod traits;
 
-pub use crate::canvas::Canvas;
+pub use crate::draw::canvas::Canvas;
