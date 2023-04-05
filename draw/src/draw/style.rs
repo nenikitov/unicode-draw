@@ -5,7 +5,8 @@ use serde::{Serialize, Deserialize};
 use crate::traits::copy_over::CopyFrom;
 
 #[derive(
-    Debug, Clone, Copy,
+    Debug,
+    Clone, Copy,
     PartialEq, Eq,
     Serialize, Deserialize
 )]
@@ -18,7 +19,8 @@ pub enum Color {
 
 
 #[derive(
-    Debug, Clone, Copy,
+    Debug,
+    Clone, Copy,
     PartialEq, Eq,
     Serialize, Deserialize
 )]
@@ -68,7 +70,8 @@ impl CopyFrom for Modifiers {
 
 
 #[derive(
-    Debug, Clone, Copy,
+    Debug,
+    Clone, Copy,
     PartialEq, Eq,
     Serialize, Deserialize
 )]
