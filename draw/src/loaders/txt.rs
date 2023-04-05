@@ -24,8 +24,72 @@ impl Exporter<String> for LoaderTxt {
             l.iter().map(|c| {
                 c.character()
             }).collect::<String>()
-            + "\n"
-        }).collect()
+        }).collect::<Vec<String>>().join("\n")
     }
 }
 
+
+#[cfg(test)]
+mod test {
+    use crate::draw::style::{Color, Modifiers};
+
+    use super::*;
+
+    #[test]
+    fn test_loader_txt_import() {
+        assert_eq!(
+            LoaderTxt::import("Hello\nworld!!!"),
+            vec![
+                vec![
+                    Character::new('H', Style::default()),
+                    Character::new('e', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('o', Style::default()),
+                    Character::new(' ', Style::default()),
+                    Character::new(' ', Style::default()),
+                    Character::new(' ', Style::default()),
+                ],
+                vec![
+                    Character::new('w', Style::default()),
+                    Character::new('o', Style::default()),
+                    Character::new('r', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('d', Style::default()),
+                    Character::new('!', Style::default()),
+                    Character::new('!', Style::default()),
+                    Character::new('!', Style::default()),
+                ]
+            ]
+        )
+    }
+
+    #[test]
+    fn test_loader_txt_export() {
+        assert_eq!(
+            LoaderTxt::export(&vec![
+                vec![
+                    Character::new('H', Style::new(Color::Red, Color::Black, Modifiers::new(true, false, false))),
+                    Character::new('e', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('o', Style::default()),
+                    Character::new(' ', Style::default()),
+                    Character::new(' ', Style::default()),
+                    Character::new(' ', Style::default()),
+                ],
+                vec![
+                    Character::new('w', Style::new(Color::DarkCyan, Color::Red, Modifiers::new(false, true, false))),
+                    Character::new('o', Style::default()),
+                    Character::new('r', Style::default()),
+                    Character::new('l', Style::default()),
+                    Character::new('d', Style::default()),
+                    Character::new('!', Style::default()),
+                    Character::new('!', Style::default()),
+                    Character::new('!', Style::default()),
+                ]
+            ]),
+            "Hello   \nworld!!!"
+        );
+    }
+}
