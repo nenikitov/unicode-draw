@@ -9,6 +9,7 @@ pub enum BlendMode {
 
 #[derive(
     Debug, Clone, Copy,
+    PartialEq, Eq,
     Serialize, Deserialize
 )]
 pub struct Character {
@@ -61,5 +62,65 @@ impl CopyFrom for Character {
     fn copy_from(&mut self, rhs: &Self) {
         self.character= rhs.character;
         self.style.copy_from(&rhs.style);
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::draw::style::{Color, Modifiers};
+
+    use super::*;
+
+    #[test]
+    fn test_character_new() {
+        assert_eq!(
+            Character::new('a', Style::new(Color::Green, Color::Yellow, Modifiers::new(true, false, false))),
+            Character { character: 'a', style: Style::new(Color::Green, Color::Yellow, Modifiers::new(true, false, false)) }
+        );
+    }
+
+    #[test]
+    fn test_character_default() {
+        assert_eq!(
+            Character::default(),
+            Character { character: ' ', style: Style::default() }
+        )
+    }
+
+    #[test]
+    fn test_character_blend_overwrite() {
+        let mut c1 = Character::new('a', Style::new(Color::Yellow, Color::Black, Modifiers::new(false, true, false)));
+        let c2 = Character::new('b', Style::new(Color::Green, Color::White, Modifiers::new(true, false, false)));
+
+        c1.blend(&c2, BlendMode::Overwrite);
+
+        assert_eq!(c1, c2);
+    }
+
+    #[test]
+    fn test_character_blend_only_character() {
+        let mut c1 = Character::new('a', Style::new(Color::Yellow, Color::Black, Modifiers::new(false, true, false)));
+        let c2 = Character::new('b', Style::new(Color::Green, Color::White, Modifiers::new(true, false, false)));
+
+        c1.blend(&c2, BlendMode::OnlyCharacter);
+
+        assert_eq!(
+            c1,
+            Character::new('b', Style::new(Color::Yellow, Color::Black, Modifiers::new(false, true, false)))
+        );
+    }
+
+    #[test]
+    fn test_character_blend_only_style() {
+        let mut c1 = Character::new('a', Style::new(Color::Yellow, Color::Black, Modifiers::new(false, true, false)));
+        let c2 = Character::new('b', Style::new(Color::Green, Color::White, Modifiers::new(true, false, false)));
+
+        c1.blend(&c2, BlendMode::OnlyStyle);
+
+        assert_eq!(
+            c1,
+            Character::new('a', Style::new(Color::Green, Color::White, Modifiers::new(true, false, false)))
+        );
     }
 }
