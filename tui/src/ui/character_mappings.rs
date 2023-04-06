@@ -100,7 +100,7 @@ impl<'a> Into<TuiSpan<'a>> for CharacterMapping<'a> {
     }
 }
 
-impl <'a> From<&DrawCharacter> for CharacterMapping<'a> {
+impl<'a> From<&DrawCharacter> for CharacterMapping<'a> {
     fn from(character: &DrawCharacter) -> Self {
         CharacterMapping(TuiSpan::styled(
             character.character().to_string(),

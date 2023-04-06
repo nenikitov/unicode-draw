@@ -6,16 +6,26 @@ use tui::{
 
 use super::{
     character_mappings::CharacterMapping,
-    drawable::{Drawable, Size},
+    drawable::*,
 };
 
 
-pub struct Canvas<'a> {
-    canvas: &'a draw::Canvas,
+pub struct Canvas {
+    canvas: draw::Canvas
 }
 
-impl<'a, B: Backend> Drawable<B> for Canvas<'a> {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
+impl Canvas {
+    pub fn new(canvas: draw::Canvas) -> Self {
+        Self { canvas }
+    }
+
+    pub fn canvas(&self) -> &draw::Canvas {
+        &self.canvas
+    }
+}
+
+impl<B: Backend> WidgetRender<B> for Canvas {
+   fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
         let lines = self.canvas.buffer().iter()
             .map(|l| {
                 let text = Spans::from(l.iter()
@@ -38,7 +48,9 @@ impl<'a, B: Backend> Drawable<B> for Canvas<'a> {
             );
         }
     }
+}
 
+impl WidgetSized for Canvas {
     fn size_preferred(&self) -> (super::drawable::Size, super::drawable::Size) {
         (
             Size {
@@ -52,3 +64,6 @@ impl<'a, B: Backend> Drawable<B> for Canvas<'a> {
         )
     }
 }
+
+
+impl<B: Backend> Widget<B> for Canvas {}

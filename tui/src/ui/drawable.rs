@@ -5,8 +5,14 @@ pub struct Size {
     pub flexible: bool
 }
 
-pub trait Drawable<B: Backend> {
+pub trait Widget<B: Backend>: WidgetRender<B> + WidgetSized {
+}
+
+pub trait WidgetRender<B: Backend> {
     fn render(&self, f: &mut Frame<B>, target: Rect);
+}
+
+pub trait WidgetSized {
     fn size_preferred(&self) -> (Size, Size);
 
     fn size_preferred_in_direction(&self, direction: &Direction) -> Size {
