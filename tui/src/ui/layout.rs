@@ -2,13 +2,22 @@ use tui::{backend::Backend, layout::{Direction, Rect}};
 
 use super::drawable::{Drawable, Size};
 
-struct Layout<B: Backend> {
+pub struct Layout<B: Backend> {
     children: Vec<Box<dyn Drawable<B>>>,
     direction: Direction,
     margin: u16
 }
 
 impl <B: Backend> Layout<B> {
+    pub fn new(children: Vec<Box<dyn Drawable<B>>>, direction: Direction, margin: u16) -> Self {
+        Self {
+            children,
+            direction,
+            margin
+        }
+    }
+
+
     fn count_flexible_children(&self, direction: &Direction) -> u16 {
         self.children.iter()
             .filter(|c| c.size_preferred_in_direction(direction).flexible)
