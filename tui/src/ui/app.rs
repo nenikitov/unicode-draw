@@ -1,12 +1,12 @@
-use std::{io::{self, Write}, time::Duration};
+use std::io::{self, Write};
 
 use crossterm::{
     execute,
-    terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen}, event::{self, Event, poll, KeyEventKind, KeyCode, KeyModifiers},
+    terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen}, event::{self, Event, KeyEventKind, KeyCode, KeyModifiers},
 };
-use tui::{backend::Backend, Terminal};
+use tui::{backend::Backend, Terminal, layout::Rect};
 
-use super::{drawable::*, canvas::Canvas};
+use super::{drawable::*, canvas::Canvas, size_error::SizeError};
 
 
 pub fn start_ui<B>(backend: B) -> Result<Terminal<B>, io::Error>
@@ -68,25 +68,33 @@ impl App {
     }
 
     fn handle_input(&mut self) -> crossterm::Result<()> {
-        if poll(Duration::from_secs(0))? {
-            let key = event::read()?;
-            if let Event::Key(key) = key {
-                match (key.kind, key.code, key.modifiers) {
-                    (KeyEventKind::Press, KeyCode::Esc, KeyModifiers::NONE) =>
-                        self.state = AppState::End,
-                    (KeyEventKind::Press, KeyCode::Char('c'), KeyModifiers::CONTROL) =>
-                        self.state = AppState::End,
-                    _ => ()
-                }
+        let event = event::read()?;
+        if let Event::Key(key) = event {
+            match (key.kind, key.code, key.modifiers) {
+                (KeyEventKind::Press, KeyCode::Esc, KeyModifiers::NONE) =>
+                    self.state = AppState::End,
+                (KeyEventKind::Press, KeyCode::Char('c'), KeyModifiers::CONTROL) =>
+                    self.state = AppState::End,
+                _ => ()
             }
         }
         Ok(())
     }
+
+    fn check_size(&self, target: Rect) -> bool {
+        let size = self.size_preferred();
+        target.width >= size.0.size && target.height >= size.1.size
+    }
 }
 
 impl<B: Backend> WidgetRender<B> for App {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
-        self.canvas.render(f, target);
+    fn render(&self, f: &mut tui::Frame<B>, target: Rect) {
+        if self.check_size(target) {
+            self.canvas.render(f, target);
+        } else {
+            let size = self.size_preferred();
+            SizeError::new((size.0.size, size.1.size)).render(f, target);
+        }
     }
 }
 
