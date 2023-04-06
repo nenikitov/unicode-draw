@@ -1,4 +1,4 @@
-use crate::{draw::character::Character, utils::Point};
+use crate::draw::character::Character;
 
 use super::character::BlendMode;
 
@@ -46,9 +46,9 @@ impl Canvas {
         }
     }
 
-    pub fn draw_character(&mut self, point: Point, character: &Character, mode: BlendMode) {
-        if let Some(l) = self.buffer.get_mut(point.y) {
-            if let Some(c) = l.get_mut(point.x) {
+    pub fn draw_character(&mut self, point: (usize, usize), character: &Character, mode: BlendMode) {
+        if let Some(l) = self.buffer.get_mut(point.1) {
+            if let Some(c) = l.get_mut(point.0) {
                 c.blend(character, mode)
             }
         }
@@ -179,7 +179,7 @@ mod test {
         let mut c = Canvas::new_filled(3, 2, fill);
 
         c.draw_character(
-            Point { x: 10, y: 10 },
+            (10, 10),
             &brush,
             BlendMode::Overwrite
         );
@@ -208,7 +208,7 @@ mod test {
         let mut c = Canvas::new_filled(3, 2, fill);
 
         c.draw_character(
-            Point { x: 2, y: 1 },
+            (2, 1),
             &brush,
             BlendMode::Overwrite
         );
@@ -237,7 +237,7 @@ mod test {
         let mut c = Canvas::new_filled(3, 2, fill);
 
         c.draw_character(
-            Point { x: 0, y: 0 },
+            (0, 0),
             &brush,
             BlendMode::OnlyCharacter
         );
@@ -266,7 +266,7 @@ mod test {
         let mut c = Canvas::new_filled(3, 2, fill);
 
         c.draw_character(
-            Point { x: 1, y: 1 },
+            (1, 1),
             &brush,
             BlendMode::OnlyStyle
         );

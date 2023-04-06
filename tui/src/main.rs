@@ -1,3 +1,5 @@
+mod ui;
+
 use draw::Canvas;
 
 fn main() {
