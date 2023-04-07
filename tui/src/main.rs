@@ -3,7 +3,7 @@ mod ui;
 use std::io;
 
 use draw::{Canvas, character::Character, style::*};
-use ui::{app, drawable::WidgetRender};
+use ui::app;
 use tui::backend::CrosstermBackend;
 
 fn main() -> Result<(), i32> {
@@ -14,6 +14,7 @@ fn main() -> Result<(), i32> {
         return Err(1);
     };
 
+    /*
     let mut app = app::App::new(
         Canvas::new_filled(
             100, 12,
@@ -31,7 +32,7 @@ fn main() -> Result<(), i32> {
 
     loop {
         terminal.draw(|f| {
-            app.render(f, f.size())
+            f.render_widget(app, f.size())
         }).unwrap();
         app.update();
 
@@ -44,4 +45,6 @@ fn main() -> Result<(), i32> {
             },
         }
     }
+    */
+    Ok(())
 }

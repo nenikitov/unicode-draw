@@ -1,23 +1,23 @@
-use tui::{backend::Backend, layout::{Direction, Rect}};
+use std::collections::HashMap;
+
+use tui::{layout::{Direction, Rect}, widgets::Widget};
 
 use super::drawable::*;
 
-
-pub struct Layout<'a, B: Backend> {
-    children: Vec<Box<&'a dyn Widget<B>>>,
+pub struct Layout<'a> {
+    children: Vec<Box<dyn Drawable + 'a>>,
     direction: Direction,
     margin: u16
 }
 
-impl<'a, B: Backend> Layout<'a, B> {
-    pub fn new(children: Vec<Box<&'a dyn Widget<B>>>, direction: Direction, margin: u16) -> Self {
+impl<'a> Layout<'a> {
+    pub fn new(children: Vec<Box<dyn Drawable + 'a>>, direction: Direction, margin: u16) -> Self {
         Self {
             children,
             direction,
             margin
         }
     }
-
 
     fn count_flexible_children(&self, direction: &Direction) -> u16 {
         self.children.iter()
@@ -28,22 +28,20 @@ impl<'a, B: Backend> Layout<'a, B> {
     fn count_margins(&self) -> u16 {
         (self.children.len() - 1).max(0) as u16
     }
-}
 
-impl<'a, B: Backend> WidgetRender<B> for Layout<'a, B> {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
+    pub fn align_children(&self, area: Rect) -> Vec<(&dyn Drawable, Rect)> {
         let size_fixed: u16 = self.children.iter()
             .map(|c| c.size_preferred_in_direction(&self.direction))
             .filter(|s| !s.flexible).map(|s| s.size).sum();
 
         let mut count_flexible = self.count_flexible_children(&self.direction);
-        let mut size_flexible = target.width - size_fixed - self.count_margins() * self.margin;
+        let mut size_flexible = area.width - size_fixed - self.count_margins() * self.margin;
         let mut position = match &self.direction {
-            Direction::Horizontal => target.x,
-            Direction::Vertical => target.y,
+            Direction::Horizontal => area.x,
+            Direction::Vertical => area.y,
         };
 
-        for c in &self.children {
+        self.children.iter().map(|c| {
             let size =
                 if c.size_preferred_in_direction(&self.direction).flexible {
                     let size = size_flexible / count_flexible;
@@ -54,33 +52,33 @@ impl<'a, B: Backend> WidgetRender<B> for Layout<'a, B> {
                 else {
                     c.size_preferred_in_direction(&self.direction).size
                 };
-            c.render(
-                f,
-                Rect {
-                    x: match &self.direction {
-                        Direction::Horizontal => position,
-                        Direction::Vertical => target.x,
-                    },
-                    y: match &self.direction {
-                        Direction::Horizontal => target.y,
-                        Direction::Vertical => position,
-                    },
-                    width: match &self.direction {
-                        Direction::Horizontal => size,
-                        Direction::Vertical => target.width,
-                    },
-                    height: match &self.direction {
-                        Direction::Horizontal => target.height,
-                        Direction::Vertical => size,
-                    },
+
+            let r = Rect {
+                x: match &self.direction {
+                    Direction::Horizontal => position,
+                    Direction::Vertical => area.x,
+                },
+                y: match &self.direction {
+                    Direction::Horizontal => area.y,
+                    Direction::Vertical => position,
+                },
+                width: match &self.direction {
+                    Direction::Horizontal => size,
+                    Direction::Vertical => area.width,
+                },
+                height: match &self.direction {
+                    Direction::Horizontal => area.height,
+                    Direction::Vertical => size,
                 }
-            );
-            position += size + self.margin;
-        }
+            };
+
+            position += size;
+            (&**c, r)
+        }).collect()
     }
 }
 
-impl<'a, B: Backend> WidgetSized for Layout<'a, B> {
+impl<'a> DrawableSize for Layout<'a> {
     fn size_preferred(&self) -> (Size, Size) {
         match self.direction {
             Direction::Horizontal => (

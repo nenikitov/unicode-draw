@@ -1,6 +1,6 @@
 use std::{slice::Iter, fmt::Display};
 
-use tui::{backend::Backend, style::{Color, Style, Modifier}, widgets::{Paragraph, Widget}, text::Span, layout::{Alignment, Direction}};
+use tui::{style::{Color, Style, Modifier}, widgets::{Paragraph, Widget}, text::Span, layout::{Alignment, Direction}};
 
 use super::{
     drawable::*, layout::Layout, spacer::Spacer,
@@ -32,23 +32,15 @@ impl Mode {
 }
 
 
-pub struct ModeBar {
-    mode: Mode
+pub struct ModeBar<'a> {
+    mode: &'a Mode
 }
 
-impl ModeBar {
-    pub fn new(mode: Mode) -> Self {
+impl<'a> ModeBar<'a> {
+    pub fn new(mode: &'a Mode) -> Self {
         Self {
             mode
         }
-    }
-
-    pub fn mode(&self) -> Mode {
-        self.mode
-    }
-
-    pub fn set_mode(&mut self, mode: Mode) {
-        self.mode = mode;
     }
 
     fn color(&self) -> Color {
@@ -59,17 +51,17 @@ impl ModeBar {
     }
 }
 
-impl<B: Backend> WidgetRender<B> for ModeBar {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
-        let text = Paragraph::new(Span::styled(
+impl<'a> Widget for ModeBar<'a> {
+    fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
+       let text = Paragraph::new(Span::styled(
             format!(" {} ", self.mode),
             Style::default().fg(self.color()).add_modifier(Modifier::REVERSED)
         )).alignment(Alignment::Center);
-        f.render_widget(text, target);
+        text.render(area, buf);
     }
 }
 
-impl WidgetSized for ModeBar {
+impl<'a> DrawableSize for ModeBar<'a> {
     fn size_preferred(&self) -> (Size, Size) {
         (
             Size {
@@ -85,38 +77,32 @@ impl WidgetSized for ModeBar {
     }
 }
 
+impl<'a> Drawable for ModeBar<'a> {}
 
-pub struct CursorBar {
-    cursor: (u16, u16)
+
+pub struct CursorBar<'a> {
+    cursor: &'a (u16, u16)
 }
 
-impl CursorBar {
-    pub fn new(cursor: (u16, u16)) -> Self {
+impl<'a> CursorBar<'a> {
+    pub fn new(cursor: &'a (u16, u16)) -> Self {
         Self {
             cursor
         }
     }
-
-    pub fn cursor(&self) -> (u16, u16) {
-        self.cursor
-    }
-
-    pub fn set_cursor(&mut self, cursor: (u16, u16)) {
-        self.cursor = cursor;
-    }
 }
 
-impl<B: Backend> WidgetRender<B> for CursorBar {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
+impl<'a> Widget for CursorBar<'a> {
+    fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
         let text = Paragraph::new(Span::styled(
             format!(" {}:{}", self.cursor.0, self.cursor.1),
             Style::default().fg(Color::Gray).add_modifier(Modifier::REVERSED)
         )).alignment(Alignment::Center);
-        f.render_widget(text, target)
+        text.render(area, buf);
     }
 }
 
-impl WidgetSized for CursorBar {
+impl<'a> DrawableSize for CursorBar<'a> {
     fn size_preferred(&self) -> (Size, Size) {
         (
             Size {
@@ -131,15 +117,15 @@ impl WidgetSized for CursorBar {
     }
 }
 
+impl<'a> Drawable for CursorBar<'a> {}
+
 
 pub struct StatusBar<'a> {
-    layout: Layout<'a>,
-    mode: ModeBar,
-    cursor: CursorBar,
+    layout: Layout<'a>
 }
 
 impl<'a> StatusBar<'a> {
-    pub fn new(mode: Mode, cursor: (u16, u16)) -> Self {
+    pub fn new(mode: &'a Mode, cursor: &'a (u16, u16)) -> Self {
         let mode = ModeBar {
             mode
         };
@@ -150,23 +136,29 @@ impl<'a> StatusBar<'a> {
         Self {
             layout: Layout::new(
                 vec![
-                    &mode,
-                    &Spacer::new_simple_flexible(1),
-                    &cursor
+                    Box::new(mode),
+                    Box::new(Spacer::new_simple_flexible(1)),
+                    Box::new(cursor),
                 ],
                 Direction::Horizontal,
                 1
-            ),
-            mode,
-            cursor
+            )
         }
     }
+}
 
-    pub fn set_mode(&mut self, mode: Mode) {
-        self.mode.set_mode(mode);
-    }
-
-    pub fn set_cursor_position(&mut self, cursor_position: (u16, u16)) {
-        self.cursor_position = cursor_position;
+impl<'a> Widget for StatusBar<'a> {
+    fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {
+        for (c, r) in self.layout.align_children(area) {
+            c.render(r, buf);
+        }
     }
 }
+
+impl<'a> DrawableSize for StatusBar<'a> {
+    fn size_preferred(&self) -> (Size, Size) {
+        self.layout.size_preferred()
+    }
+}
+
+impl<'a> Drawable for StatusBar<'a> {}

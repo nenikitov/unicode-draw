@@ -1,4 +1,4 @@
-use tui::{Frame, backend::Backend, layout::{Rect, Direction}};
+use tui::{layout::Direction, widgets::Widget};
 
 #[derive(Clone, Copy)]
 pub struct Size {
@@ -6,13 +6,9 @@ pub struct Size {
     pub flexible: bool
 }
 
-pub trait Widget<B: Backend>: WidgetRender<B> + WidgetSized {}
+pub trait Drawable: Widget + DrawableSize {}
 
-pub trait WidgetRender<B: Backend> {
-    fn render(&self, f: &mut Frame<B>, target: Rect);
-}
-
-pub trait WidgetSized {
+pub trait DrawableSize {
     fn size_preferred(&self) -> (Size, Size);
 
     fn size_preferred_in_direction(&self, direction: &Direction) -> Size {

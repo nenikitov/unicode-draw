@@ -1,7 +1,6 @@
 use tui::{
-    backend::Backend,
     text::Spans,
-    widgets::{Block, Borders, Paragraph}, layout::Rect,
+    widgets::{Block, Borders, Paragraph, Widget}, layout::Rect,
 };
 
 use super::{
@@ -24,9 +23,9 @@ impl Canvas {
     }
 }
 
-impl<B: Backend> WidgetRender<B> for Canvas {
-   fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
-        let lines = self.canvas.buffer().iter()
+impl Widget for Canvas {
+    fn render(self, area: Rect, buf: &mut tui::buffer::Buffer) {
+       let lines = self.canvas.buffer().iter()
             .map(|l| {
                 let text = Spans::from(l.iter()
                     .map(|c| CharacterMapping::from(c).into())
@@ -37,20 +36,20 @@ impl<B: Backend> WidgetRender<B> for Canvas {
             }).collect::<Vec<_>>();
 
         for (i, l) in lines.into_iter().enumerate() {
-            f.render_widget(
-                l,
+            l.render(
                 Rect {
-                    x: target.x,
-                    y: target.y + i as u16,
-                    width: target.width,
+                    x: area.x,
+                    y: area.y + i as u16,
+                    width: area.width,
                     height: 1,
-                }
-            );
+                } ,
+                buf
+            )
         }
     }
 }
 
-impl WidgetSized for Canvas {
+impl DrawableSize for Canvas {
     fn size_preferred(&self) -> (super::drawable::Size, super::drawable::Size) {
         (
             Size {
@@ -64,3 +63,5 @@ impl WidgetSized for Canvas {
         )
     }
 }
+
+impl Drawable for Canvas {}

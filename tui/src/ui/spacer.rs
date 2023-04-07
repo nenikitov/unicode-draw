@@ -1,8 +1,6 @@
-use tui::backend::Backend;
+use tui::widgets::Widget;
 
-use super::{
-    drawable::*,
-};
+use super::drawable::*;
 
 pub struct Spacer {
     sizes: (Size, Size)
@@ -33,12 +31,14 @@ impl Spacer {
     }
 }
 
-impl <B: Backend> WidgetRender<B> for Spacer {
-    fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {}
+impl Widget for Spacer {
+    fn render(self, area: tui::layout::Rect, buf: &mut tui::buffer::Buffer) {}
 }
 
-impl WidgetSized for Spacer {
+impl DrawableSize for Spacer {
     fn size_preferred(&self) -> (Size, Size) {
         self.sizes
     }
 }
+
+impl Drawable for Spacer {}

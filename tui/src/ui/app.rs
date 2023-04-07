@@ -4,7 +4,7 @@ use crossterm::{
     execute,
     terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen}, event::{self, Event, KeyEventKind, KeyCode, KeyModifiers},
 };
-use tui::{backend::Backend, Terminal, layout::Rect};
+use tui::{backend::Backend, Terminal, layout::Rect, widgets::Widget};
 
 use super::{drawable::*, canvas::Canvas, size_error::SizeError};
 
@@ -87,18 +87,18 @@ impl App {
     }
 }
 
-impl<B: Backend> WidgetRender<B> for App {
-    fn render(&self, f: &mut tui::Frame<B>, target: Rect) {
-        if self.check_size(target) {
-            self.canvas.render(f, target);
+impl Widget for App {
+    fn render(self, area: Rect, buf: &mut tui::buffer::Buffer) {
+        if self.check_size(area) {
+            self.canvas.render(area, buf);
         } else {
             let size = self.size_preferred();
-            SizeError::new((size.0.size, size.1.size)).render(f, target);
+            SizeError::new((size.0.size, size.1.size)).render(area, buf);
         }
     }
 }
 
-impl WidgetSized for App {
+impl DrawableSize for App {
     fn size_preferred(&self) -> (Size, Size) {
         self.canvas.size_preferred()
     }
