@@ -103,5 +103,3 @@ impl WidgetSized for App {
         self.canvas.size_preferred()
     }
 }
-
-impl<B: Backend> Widget<B> for App {}

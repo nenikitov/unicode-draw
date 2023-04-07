@@ -1,12 +1,12 @@
 use tui::{Frame, backend::Backend, layout::{Rect, Direction}};
 
+#[derive(Clone, Copy)]
 pub struct Size {
     pub size: u16,
     pub flexible: bool
 }
 
-pub trait Widget<B: Backend>: WidgetRender<B> + WidgetSized {
-}
+pub trait Widget<B: Backend>: WidgetRender<B> + WidgetSized {}
 
 pub trait WidgetRender<B: Backend> {
     fn render(&self, f: &mut Frame<B>, target: Rect);

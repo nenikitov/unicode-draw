@@ -2,14 +2,15 @@ use tui::{backend::Backend, layout::{Direction, Rect}};
 
 use super::drawable::*;
 
-pub struct Layout<B: Backend> {
-    children: Vec<Box<dyn Widget<B>>>,
+
+pub struct Layout<'a, B: Backend> {
+    children: Vec<Box<&'a dyn Widget<B>>>,
     direction: Direction,
     margin: u16
 }
 
-impl<B: Backend> Layout<B> {
-    pub fn new(children: Vec<Box<dyn Widget<B>>>, direction: Direction, margin: u16) -> Self {
+impl<'a, B: Backend> Layout<'a, B> {
+    pub fn new(children: Vec<Box<&'a dyn Widget<B>>>, direction: Direction, margin: u16) -> Self {
         Self {
             children,
             direction,
@@ -29,7 +30,7 @@ impl<B: Backend> Layout<B> {
     }
 }
 
-impl<B: Backend> WidgetRender<B> for Layout<B> {
+impl<'a, B: Backend> WidgetRender<B> for Layout<'a, B> {
     fn render(&self, f: &mut tui::Frame<B>, target: tui::layout::Rect) {
         let size_fixed: u16 = self.children.iter()
             .map(|c| c.size_preferred_in_direction(&self.direction))
@@ -79,7 +80,7 @@ impl<B: Backend> WidgetRender<B> for Layout<B> {
     }
 }
 
-impl<B: Backend> WidgetSized for Layout<B> {
+impl<'a, B: Backend> WidgetSized for Layout<'a, B> {
     fn size_preferred(&self) -> (Size, Size) {
         match self.direction {
             Direction::Horizontal => (
@@ -107,6 +108,3 @@ impl<B: Backend> WidgetSized for Layout<B> {
         }
     }
 }
-
-
-impl<B: Backend> Widget<B> for Layout<B> {}

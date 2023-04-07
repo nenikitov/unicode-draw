@@ -57,5 +57,3 @@ impl WidgetSized for SizeError {
         )
     }
 }
-
-impl< B: Backend> Widget<B> for SizeError {}

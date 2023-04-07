@@ -64,6 +64,3 @@ impl WidgetSized for Canvas {
         )
     }
 }
-
-
-impl<B: Backend> Widget<B> for Canvas {}
